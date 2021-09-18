@@ -1,0 +1,9 @@
+.git
+.dcignore
+.env
+.idea
+.flake8
+.pre-commit-config.yaml
+.pylintcr
+
+/temp
