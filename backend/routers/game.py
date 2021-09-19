@@ -1,6 +1,6 @@
 from typing import Union
 
-from fastapi import APIRouter, Body, HTTPException, status
+from fastapi import APIRouter, Body, Response, status
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 
@@ -34,29 +34,36 @@ async def get_games() -> JSONResponse:
 
 
 @router.get("/get-game/{id}", response_description="Game data retrieved")
-async def get_game_data(id: str) -> Union[JSONResponse, HTTPException]:
+async def get_game_data(id: str, response: Response) -> Union[JSONResponse, Response]:
     if game := await retrieve_game(id):
         return JSONResponse(status_code=status.HTTP_200_OK, content=game)
-    return HTTPException(status_code=404, detail=f"Game {id} not found.")
+    else:
+        response.status_code = status.HTTP_404_NOT_FOUND
+        return response
 
 
 @router.put("/update-game/{id}", response_description="Game data updated")
 async def update_game_data(
-    id: str, request_data: UpdateGameModel = Body(...)
-) -> Union[JSONResponse, HTTPException]:
+    id: str, response: Response, request_data: UpdateGameModel = Body(...)
+) -> Response:
     request_data = {k: v for k, v in request_data.dict().items() if v is not None}
-    if updated_game := await update_game(id, request_data):
-        return JSONResponse(status_code=status.HTTP_200_OK, content=updated_game)
-    return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+    if await update_game(id, request_data):
+        response.status_code = status.HTTP_200_OK
+        return response
+    response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    return response
 
 
 @router.delete(
     "/delete-game/{id}", response_description="Game data deleted from the database"
 )
-async def delete_game_data(id: str) -> Union[JSONResponse, HTTPException]:
+async def delete_game_data(
+    id: str, response: Response
+) -> Union[JSONResponse, Response]:
     if await delete_game(id):
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"detail": f"Game with ID: {id} was removed"},
         )
-    return HTTPException(status_code=status.HTTP_204_NO_CONTENT)
+    response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    return response

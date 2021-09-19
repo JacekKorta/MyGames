@@ -1,5 +1,5 @@
 from datetime import datetime, date
-from typing import Union
+from typing import List, Optional, Union
 
 from bson.objectid import ObjectId
 import motor.motor_asyncio
@@ -30,7 +30,7 @@ def game_helper(game) -> dict:
     }
 
 
-async def retrieve_games():
+async def retrieve_games() -> List:
     games = []
     async for game in games_collection.find():
         games.append(game_helper(game))
@@ -43,18 +43,16 @@ async def add_game(game_data: dict) -> dict:
     return game_helper(new_game)
 
 
-async def retrieve_game(id: str) -> dict:
-    game = await games_collection.find_one({"_id": ObjectId(id)})
-    if game:
+async def retrieve_game(id: str) -> Optional[dict]:
+    if game := await games_collection.find_one({"_id": ObjectId(id)}):
         return game_helper(game)
 
 
-async def update_game(id: str, data: dict) -> bool:
+async def update_game(id: str, data: dict) -> Optional[bool]:
     if len(data) < 1:
         return False
-    game = await games_collection.find_one({"_id": ObjectId(id)})
     data["published_date"] = date_to_datetime(data["published_date"])
-    if game:
+    if await games_collection.find_one({"_id": ObjectId(id)}):
         updated_game = await games_collection.update_one(
             {"_id": ObjectId(id)}, {"$set": data}
         )
@@ -63,8 +61,7 @@ async def update_game(id: str, data: dict) -> bool:
         return False
 
 
-async def delete_game(id: str):
-    game = await games_collection.find_one({"_id": ObjectId(id)})
-    if game:
+async def delete_game(id: str) -> Optional[bool]:
+    if await games_collection.find_one({"_id": ObjectId(id)}):
         await games_collection.delete_one({"_id": ObjectId(id)})
         return True
