@@ -44,26 +44,22 @@ async def get_game_data(id: str, response: Response) -> Union[JSONResponse, Resp
 
 @router.put("/update-game/{id}", response_description="Game data updated")
 async def update_game_data(
-    id: str, response: Response, request_data: UpdateGameModel = Body(...)
+        id: str, response: Response, request_data: UpdateGameModel = Body(...)
 ) -> Response:
     request_data = {k: v for k, v in request_data.dict().items() if v is not None}
     if await update_game(id, request_data):
         response.status_code = status.HTTP_200_OK
         return response
-    response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    response.status_code = status.HTTP_404_NOT_FOUND
     return response
 
 
-@router.delete(
-    "/delete-game/{id}", response_description="Game data deleted from the database"
-)
-async def delete_game_data(
-    id: str, response: Response
-) -> Union[JSONResponse, Response]:
+@router.delete("/delete-game/{id}", response_description="Game data deleted from the database")
+async def delete_game_data(id: str, response: Response) -> Union[JSONResponse, Response]:
     if await delete_game(id):
         return JSONResponse(
             status_code=status.HTTP_200_OK,
             content={"detail": f"Game with ID: {id} was removed"},
         )
-    response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+    response.status_code = status.HTTP_404_NOT_FOUND
     return response
