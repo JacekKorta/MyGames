@@ -1,20 +1,24 @@
 version: '3.8'
 
 services:
-  db:
+  mongo:
     image: mongo:latest
-    container_name: mongodb-container
     env_file:
       - .env
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: '${MONGODB_USERNAME}'
+      MONGO_INITDB_ROOT_PASSWORD: '${MONGODB_PASSWORD}'
+    ports:
+      - 27017:27017
   backend:
     build: .
-    command: uvicorn backend.main:app --host 0.0.0.0 --reload
+    command: uvicorn backend.main:app --host 0.0.0.0
     volumes:
       - .:/backend
     container_name: backend-container
     env_file:
       - .env
     depends_on:
-      - db
+      - mongo
     ports:
       - 8000:8000
