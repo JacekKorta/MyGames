@@ -1,12 +1,10 @@
 from datetime import date
-from uuid import uuid4
 from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
 class GameSchema(BaseModel):
-    id: str = Field(default_factory=uuid4, alias="_id")
     title: str = Field(None, title="Game title", max_length=60)
     description: Optional[str] = Field(None, title="Game description", max_length=300)
     published_date: Optional[date] = Field(None, title="Published date")
