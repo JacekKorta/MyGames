@@ -24,7 +24,6 @@ class TestRoutes:
 
     def test_get_games(self):
         response = client.get("/my-games/get-games")
-        assert len(response.json()) == 1
         assert response.status_code == 200
 
     def test_get_game_data_success(self):
@@ -68,4 +67,4 @@ class TestRoutes:
     def test_delete_game_data_fail(self):
         fake_id = ObjectId()
         response = client.delete(f"/my-games/delete-game/{fake_id}")
-        assert response.status_code == 422
+        assert response.status_code == 404
