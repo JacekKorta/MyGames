@@ -2,8 +2,10 @@
 .dcignore
 .env
 .idea
+.isort.cfg
 .flake8
 .pre-commit-config.yaml
-.pylintcr
+.pylintrc
+.volumes/
 
 /temp
